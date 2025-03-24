@@ -1,0 +1,19 @@
+# Ignorer les dossiers volumineux
+validation/
+model/saved_model_vgg16_unet/
+*.h5
+*.keras
+
+# Fichiers Python inutiles
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Environnement virtuel
+.venv/
+.env/
+
+# OS & IDE
+.DS_Store
+.vscode/

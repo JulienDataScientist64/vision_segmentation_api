@@ -1,0 +1,43 @@
+[tool.poetry]
+name = "vision-segmentation"
+version = "0.1.0"
+description = "Déploiement d'un modèle de segmentation sémantique avec FastAPI et Streamlit"
+authors = ["Julien Cantalapiedra <jcantalapiedra1@gmail.com>"]
+readme = "README.md"
+package-mode = false
+
+# Ajout des packages à inclure
+packages = [
+    { include = "app" }
+]
+
+[tool.poetry.dependencies]
+python = ">=3.10,<3.12"  # Aligné avec Colab (Python 3.10 ou 3.11)
+fastapi = "0.100.0"
+httpx = "^0.24.0"
+tensorflow-io-gcs-filesystem = "0.31.0"
+scikit-learn = "1.6.1"  # Aligné avec Colab
+numpy = "1.26.4"        # Aligné avec Colab
+pandas = "2.2.2"        # Identique à Colab
+matplotlib = "3.10.0"   # Ajouté pour correspondre à Colab
+gensim = "4.3.3"
+transformers = "4.47.1"
+pytest = "8.3.4"
+mlflow = "2.19.0"
+joblib = "1.4.2"
+seaborn = "0.13.2"
+azureml-core = "1.57.0"
+azure-identity = "1.7.0"
+uvicorn = "0.24.0"
+streamlit = "^1.41.1"
+opencensus-ext-azure = "^1.1.14"
+opencensus-ext-requests = "^0.8.0"
+opencensus = "^0.11.4"
+opencensus-ext-threading = "^0.1.2"
+tensorflow = "^2.18.0"
+opencv-python-headless = "^4.11.0.86"
+python-multipart = "^0.0.20"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
