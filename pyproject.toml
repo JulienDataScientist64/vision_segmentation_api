@@ -5,21 +5,15 @@ description = "Déploiement d'un modèle de segmentation sémantique avec FastAP
 authors = ["Julien Cantalapiedra <jcantalapiedra1@gmail.com>"]
 readme = "README.md"
 
-
-# Ajout des packages à inclure
-packages = [
-    { include = "app" }
-]
-
 [tool.poetry.dependencies]
-python = ">=3.10,<3.12"  # Aligné avec Colab (Python 3.10 ou 3.11)
+python = ">=3.10,<3.12"
 fastapi = "0.100.0"
 httpx = "^0.24.0"
 tensorflow-io-gcs-filesystem = "0.31.0"
-scikit-learn = "1.6.1"  # Aligné avec Colab
-numpy = "1.26.4"        # Aligné avec Colab
-pandas = "2.2.2"        # Identique à Colab
-matplotlib = "3.10.0"   # Ajouté pour correspondre à Colab
+scikit-learn = "1.6.1"
+numpy = "1.26.4"
+pandas = "2.2.2"
+matplotlib = "3.10.0"
 gensim = "4.3.3"
 transformers = "4.47.1"
 pytest = "8.3.4"
