@@ -29,7 +29,9 @@ MAPPING_TABLE = tf.constant(
 )
 
 # Chargement unique du modèle d'inférence
-MODEL_SAVE_PATH = r"C:\Users\julien\vision_segmentation\model\saved_model_vgg16_unet"
+MODEL_SAVE_PATH = "../model/saved_model_vgg16_unet"
+
+
 loaded_model = tf.saved_model.load(MODEL_SAVE_PATH)
 infer = loaded_model.signatures['serving_default']
 
