@@ -1,3 +1,7 @@
+# Ne pas ignorer le dossier model
+!model/**
+
+# Ignorer les autres fichiers volumineux dans le reste du projet
 *.h5
 *.keras
 *.pb
@@ -9,3 +13,5 @@
 *.tiff
 __pycache__
 .venv
+# Ignorer le dossier validation
+validation/
