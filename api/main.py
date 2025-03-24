@@ -4,15 +4,14 @@ import tensorflow as tf
 import numpy as np
 from PIL import Image
 import io
+from pathlib import Path
 
-# Application FastAPI avec métadonnées
 app = FastAPI(
     title="API Segmentation Sémantique",
     version="1.0.0",
     description="Inférence segmentation sémantique utilisant TensorFlow."
 )
 
-# Mapping Cityscapes → 8 classes
 CLASS_TO_CATEGORY = {
     7: 0, 8: 0, 9: 0, 10: 0,
     24: 1, 25: 1,
@@ -28,14 +27,19 @@ MAPPING_TABLE = tf.constant(
     dtype=tf.uint8
 )
 
-# Chargement unique du modèle d'inférence
-MODEL_SAVE_PATH = "../model/saved_model_vgg16_unet"
+from pathlib import Path
 
+BASE_DIR = Path(__file__).resolve().parent  # <- "api/"
+MODEL_SAVE_PATH = str(BASE_DIR.parent / "model" / "saved_model_vgg16_unet")
+# Soit : vision_segmentation/model/saved_model_vgg16_unet
 
+loaded_model = tf.saved_model.load(MODEL_SAVE_PATH)
+infer = loaded_model.signatures["serving_default"]
+
+# Chargement du modèle
 loaded_model = tf.saved_model.load(MODEL_SAVE_PATH)
 infer = loaded_model.signatures['serving_default']
 
-# Fonctions utilitaires
 def preprocess_image(img: Image.Image):
     img_resized = img.resize((512, 256))
     img_tensor = tf.convert_to_tensor(np.array(img_resized), dtype=tf.float32) / 255.0
@@ -66,7 +70,6 @@ async def predict(image_file: UploadFile = File(...)):
     img_tensor = preprocess_image(img)
     pred_mask = predict_mask(img_tensor)
 
-    # Renvoi du masque prédit comme PNG
     mask_image = Image.fromarray(pred_mask.astype(np.uint8), mode="L")
     buffer = io.BytesIO()
     mask_image.save(buffer, format="PNG")

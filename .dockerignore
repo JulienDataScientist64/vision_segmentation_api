@@ -1,0 +1,11 @@
+*.h5
+*.keras
+*.pb
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.bmp
+*.tiff
+__pycache__
+.venv
