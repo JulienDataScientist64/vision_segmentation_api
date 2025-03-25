@@ -3,6 +3,7 @@ from api.main import app
 from unittest.mock import patch
 import pytest
 from pathlib import Path
+import numpy as np  # <- Import ajouté
 
 client = TestClient(app)
 
