@@ -1,4 +1,4 @@
-name: 🚀 Deploy FastAPI to Heroku (sans Docker)
+name: 🚀 Deploy FastAPI to Heroku
 
 on:
   push:
@@ -24,7 +24,7 @@ jobs:
       - name: 📦 Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt pytest huggingface_hub
+          pip install -r huggingface_hub
       - name: 📥 Télécharger le modèle Hugging Face
         run: |
           python -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='cantalapiedra/semantic-segmentation-model', local_dir='./hf_cache')"
