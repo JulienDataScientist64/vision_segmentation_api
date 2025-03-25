@@ -11,31 +11,41 @@ jobs:
 
     steps:
     - name: 📥 Checkout repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
+      with:
+        lfs: true  # Obligatoire si tu utilises Git LFS (fichiers Hugging Face)
 
-    - name: 🐍 Set up Python
-      uses: actions/setup-python@v4
+    - name: 🐍 Set up Python 3.10
+      uses: actions/setup-python@v5
       with:
         python-version: '3.10'
-
-    - name: 📥 Télécharger le modèle Hugging Face
-      run: |
-        pip install huggingface_hub
-        python -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='cantalapiedra/semantic-segmentation-model', local_dir='./hf_cache', local_dir_use_symlinks=False)"
-      
 
     - name: 📦 Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
+    - name: 📥 Télécharger le modèle Hugging Face
+      run: |
+        python -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='cantalapiedra/semantic-segmentation-model', local_dir='./hf_cache')"
+
     - name: ✅ Run tests
       run: pytest
 
-    - name: 🚀 Deploy to Heroku (non-Docker)
-      uses: akhileshns/heroku-deploy@v3.12.12
-      with:
-        heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
-        heroku_app_name: ${{ secrets.HEROKU_APP_NAME }}
-        heroku_email: ${{ secrets.HEROKU_EMAIL }}
-        usedocker: false
+    - name: 🚀 Install Heroku CLI
+      run: curl https://cli-assets.heroku.com/install.sh | sh
+
+    - name: 🔐 Heroku login
+      env:
+        HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+      run: heroku container:login
+
+    - name: 🚀 Deploy to Heroku
+      env:
+        HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+        HEROKU_APP_NAME: ${{ secrets.HEROKU_APP_NAME }}
+      run: |
+        git config --global user.email "${{ secrets.HEROKU_EMAIL }}"
+        git config --global user.name "github-action"
+        git remote add heroku https://heroku:${HEROKU_API_KEY}@git.heroku.com/${HEROKU_APP_NAME}.git
+        git push heroku HEAD:main --force
