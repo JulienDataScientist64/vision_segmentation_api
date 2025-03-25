@@ -29,20 +29,18 @@ MAPPING_TABLE = tf.constant(
     dtype=tf.uint8
 )
 
-# Variables globales pour le modèle
-model = None
-infer = None
+# 📦 Téléchargement du modèle depuis Hugging Face vers un cache local
+MODEL_DIR = snapshot_download(
+    repo_id="cantalapiedra/semantic-segmentation-model",
+    local_dir="./hf_cache",
+    local_dir_use_symlinks=False
+)
 
-def load_model():
-    """Télécharge et charge le modèle depuis Hugging Face si non chargé."""
-    global model, infer
-    if model is None or infer is None:
-        model_path = snapshot_download("cantalapiedra/semantic-segmentation-model")
-        model = tf.saved_model.load(model_path)
-        infer = model.signatures["serving_default"]
+# 🔁 Chargement une fois pour toutes au démarrage de l'API
+model = tf.saved_model.load(MODEL_DIR)
+infer = model.signatures["serving_default"]
 
 def preprocess_image(img: Image.Image) -> tf.Tensor:
-    """Prépare l’image pour l’inférence (resize + normalisation)."""
     img_resized = img.resize((512, 256))
     img_array = np.array(img_resized, dtype=np.float32) / 255.0
     img_tensor = tf.convert_to_tensor(img_array)
@@ -50,8 +48,6 @@ def preprocess_image(img: Image.Image) -> tf.Tensor:
     return img_tensor
 
 def predict_mask(img_tensor: tf.Tensor) -> np.ndarray:
-    """Effectue la prédiction de masque depuis l’image tensorisée."""
-    load_model()
     pred = infer(img_tensor)
     pred_key = list(pred.keys())[0]
     pred_mask = tf.argmax(pred[pred_key], axis=-1)[0].numpy()
