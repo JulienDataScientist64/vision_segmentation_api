@@ -30,16 +30,16 @@ jobs:
       - name: ✅ Run tests
         run: pytest
 
-        - name: 🔧 Install Heroku CLI
+      - name: 🔧 Install Heroku CLI
         run: |
           curl https://cli-assets.heroku.com/install.sh | sh
-      
+
       - name: 🔑 Configure Heroku Remote (avec API Key)
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
           HEROKU_APP_NAME: ${{ secrets.HEROKU_APP_NAME }}
         run: |
           git remote add heroku https://heroku:${HEROKU_API_KEY}@git.heroku.com/${HEROKU_APP_NAME}.git
-      
+
       - name: 🚀 Deploy to Heroku (non-Docker)
         run: git push heroku HEAD:main -f
