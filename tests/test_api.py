@@ -1,7 +1,12 @@
 import pytest
 from fastapi.testclient import TestClient
-from api.main import app
+from huggingface_hub import snapshot_download
 from pathlib import Path
+
+# ⚠️ On force le téléchargement du modèle pour éviter l'erreur de chargement
+snapshot_download(repo_id="cantalapiedra/semantic-segmentation-model", local_dir_use_symlinks=False)
+
+from api.main import app
 
 client = TestClient(app)
 
