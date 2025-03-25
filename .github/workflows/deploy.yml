@@ -18,6 +18,12 @@ jobs:
       with:
         python-version: '3.10'
 
+    - name: 📥 Télécharger le modèle Hugging Face
+      run: |
+        pip install huggingface_hub
+        python -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='cantalapiedra/semantic-segmentation-model', local_dir='./hf_cache', local_dir_use_symlinks=False)"
+      
+
     - name: 📦 Install dependencies
       run: |
         python -m pip install --upgrade pip

@@ -33,8 +33,10 @@ MAPPING_TABLE = tf.constant(
 MODEL_DIR = snapshot_download(
     repo_id="cantalapiedra/semantic-segmentation-model",
     local_dir="./hf_cache",
-    local_dir_use_symlinks=False
+    local_dir_use_symlinks=False,
+    ignore_patterns=["*.msgpack", "*.h5", "*.bin", "*.safetensors"]
 )
+
 
 # 🔁 Chargement une fois pour toutes au démarrage de l'API
 model = tf.saved_model.load(MODEL_DIR)
