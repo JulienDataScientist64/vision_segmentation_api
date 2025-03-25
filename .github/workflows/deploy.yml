@@ -19,7 +19,7 @@ jobs:
       - name: 🐍 Set up Python (from runtime.txt)
         uses: actions/setup-python@v5
         with:
-           python-version: '3.10'
+          python-version: '3.10'
 
       - name: 📦 Install dependencies using Poetry
         run: |
@@ -42,15 +42,15 @@ jobs:
         run: |
           curl https://cli-assets.heroku.com/install.sh | sh
 
-          - name: 🔑 Configure Heroku Remote
-          env:
-            HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
-            HEROKU_APP_NAME: ${{ secrets.HEROKU_APP_NAME }}
-          run: |
-            git config --global user.email "actions@github.com"
-            git config --global user.name "GitHub Actions"
-            git remote remove heroku || true
-            git remote add heroku https://heroku:${HEROKU_API_KEY}@git.heroku.com/${HEROKU_APP_NAME}.git
+      - name: 🔑 Configure Heroku Remote
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+          HEROKU_APP_NAME: ${{ secrets.HEROKU_APP_NAME }}
+        run: |
+          git config --global user.email "actions@github.com"
+          git config --global user.name "GitHub Actions"
+          git remote remove heroku || true
+          git remote add heroku https://heroku:${HEROKU_API_KEY}@git.heroku.com/${HEROKU_APP_NAME}.git
 
       - name: 🚀 Deploy to Heroku (force push main branch)
         run: |
