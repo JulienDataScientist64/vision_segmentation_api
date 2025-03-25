@@ -1,4 +1,4 @@
-name: Build and Deploy FastAPI to Heroku
+name: 🚀 Deploy FastAPI to Heroku (sans Docker)
 
 on:
   push:
@@ -6,44 +6,30 @@ on:
       - main
 
 jobs:
-  build-deploy:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
     - name: 📥 Checkout repository
       uses: actions/checkout@v3
-      with:
-        lfs: true  # IMPORTANT : permet de récupérer les fichiers gérés par Git LFS
 
-    - name: 🐍 Set up Python 3.10
+    - name: 🐍 Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.10'
 
-    - name: 📦 Install Poetry and dependencies
+    - name: 📦 Install dependencies
       run: |
-        pip install poetry==1.6.1
-        poetry install
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
 
-    - name: 🧐 Debug model folder
-      run: |
-          ls -lah model/
-          ls -lah model/saved_model_vgg16_unet
-      
+    - name: ✅ Run tests
+      run: pytest
 
-    - name: ✅ Run Tests
-      run: poetry run pytest
-
-    - name: 🔐 Login to Heroku Container Registry
-      run: echo "${{ secrets.HEROKU_API_KEY }}" | docker login --username=_ --password-stdin registry.heroku.com
-
-    - name: 🐳 Build Docker Image
-      run: docker build -t registry.heroku.com/${{ secrets.HEROKU_APP_NAME }}/web .
-
-    - name: 🚀 Push Docker Image to Heroku
-      run: docker push registry.heroku.com/${{ secrets.HEROKU_APP_NAME }}/web
-
-    - name: 📤 Release App on Heroku
-      run: heroku container:release web -a ${{ secrets.HEROKU_APP_NAME }}
-      env:
-        HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+    - name: 🚀 Deploy to Heroku (non-Docker)
+      uses: akhileshns/heroku-deploy@v3.12.12
+      with:
+        heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+        heroku_app_name: ${{ secrets.HEROKU_APP_NAME }}
+        heroku_email: ${{ secrets.HEROKU_EMAIL }}
+        usedocker: false

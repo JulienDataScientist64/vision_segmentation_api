@@ -4,6 +4,7 @@ import tensorflow as tf
 import numpy as np
 from PIL import Image
 import io
+from huggingface_hub import snapshot_download
 from pathlib import Path
 
 app = FastAPI(
@@ -27,16 +28,15 @@ MAPPING_TABLE = tf.constant(
     dtype=tf.uint8
 )
 
-from pathlib import Path
+# ====== Téléchargement du modèle depuis Hugging Face (automatiquement à l'initialisation) ======
+MODEL_REPO_ID = "cantalapiedra/semantic-segmentation-model"
+MODEL_LOCAL_DIR = "hf_model"
+MODEL_SUBDIR = "saved_model_vgg16_unet"
 
-BASE_DIR = Path(__file__).resolve().parent  # <- "api/"
-MODEL_SAVE_PATH = str(BASE_DIR.parent / "model" / "saved_model_vgg16_unet")
-# Soit : vision_segmentation/model/saved_model_vgg16_unet
+model_path = snapshot_download(repo_id=MODEL_REPO_ID, local_dir=MODEL_LOCAL_DIR, repo_type="model", allow_patterns=["*"])
+MODEL_SAVE_PATH = str(Path(model_path) / MODEL_SUBDIR)
 
-loaded_model = tf.saved_model.load(MODEL_SAVE_PATH)
-infer = loaded_model.signatures["serving_default"]
-
-# Chargement du modèle
+# Chargement du modèle TensorFlow
 loaded_model = tf.saved_model.load(MODEL_SAVE_PATH)
 infer = loaded_model.signatures['serving_default']
 
