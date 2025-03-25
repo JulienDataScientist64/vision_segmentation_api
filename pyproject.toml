@@ -3,7 +3,7 @@ name = "vision-segmentation"
 version = "0.1.0"
 description = "Déploiement d'un modèle de segmentation sémantique avec FastAPI et Streamlit"
 authors = ["Julien Cantalapiedra <jcantalapiedra1@gmail.com>"]
-readme = "README.md"
+# readme = "README.md"
 
 [tool.poetry.dependencies]
 python = ">=3.10,<3.12"
