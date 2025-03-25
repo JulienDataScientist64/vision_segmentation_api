@@ -1,3 +1,4 @@
+# api/main.py
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.responses import StreamingResponse
 import tensorflow as tf
@@ -23,22 +24,22 @@ CLASS_TO_CATEGORY = {
     23: 6,
     0: 7, 1: 7, 2: 7, 3: 7, 4: 7, 5: 7, 255: 7
 }
+
 MAPPING_TABLE = tf.constant(
     [CLASS_TO_CATEGORY.get(i, 7) for i in range(256)],
     dtype=tf.uint8
 )
 
-# ====== Téléchargement du modèle depuis Hugging Face (automatiquement à l'initialisation) ======
-MODEL_REPO_ID = "cantalapiedra/semantic-segmentation-model"
-MODEL_LOCAL_DIR = "hf_model"
-MODEL_SUBDIR = "saved_model_vgg16_unet"
+# Charger le modèle uniquement à la première requête
+model = None
+infer = None
 
-model_path = snapshot_download(repo_id=MODEL_REPO_ID, local_dir=MODEL_LOCAL_DIR, repo_type="model", allow_patterns=["*"])
-MODEL_SAVE_PATH = str(Path(model_path) / MODEL_SUBDIR)
-
-# Chargement du modèle TensorFlow
-loaded_model = tf.saved_model.load(MODEL_SAVE_PATH)
-infer = loaded_model.signatures['serving_default']
+def load_model():
+    global model, infer
+    if model is None or infer is None:
+        model_path = snapshot_download("cantalapiedra/semantic-segmentation-model")
+        model = tf.saved_model.load(model_path)
+        infer = model.signatures["serving_default"]
 
 def preprocess_image(img: Image.Image):
     img_resized = img.resize((512, 256))
@@ -47,6 +48,7 @@ def preprocess_image(img: Image.Image):
     return img_tensor
 
 def predict_mask(img_tensor):
+    load_model()
     pred = infer(img_tensor)
     pred_key = list(pred.keys())[0]
     pred_mask = tf.argmax(pred[pred_key], axis=-1)[0].numpy()
