@@ -42,28 +42,30 @@ jobs:
         run: |
           curl https://cli-assets.heroku.com/install.sh | sh
 
-      - name: 🔑 Authenticate with Heroku
+      - name: 🔑 Heroku Authentication
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+          HEROKU_EMAIL: ${{ secrets.HEROKU_EMAIL }}
         run: |
-          # Create netrc file for authentication
-          cat > ~/.netrc <<EOF
-          machine api.heroku.com
-            login ${{ secrets.HEROKU_EMAIL }}
-            password ${HEROKU_API_KEY}
+          # Unset API key variable before login
+          unset HEROKU_API_KEY
+          
+          # Login using interactive mode
+          echo "machine api.heroku.com
+            login $HEROKU_EMAIL
+            password $HEROKU_API_KEY
           machine git.heroku.com
-            login ${{ secrets.HEROKU_EMAIL }}
-            password ${HEROKU_API_KEY}
-          EOF
-
-          # Verify Heroku authentication
+            login $HEROKU_EMAIL
+            password $HEROKU_API_KEY" > ~/.netrc
+          
+          chmod 600 ~/.netrc
+          
+          # Verify authentication
           heroku auth:whoami
 
-      - name: 🚀 Deploy to Heroku
+      - name: 🚀 Deploy Application
         env:
           HEROKU_APP_NAME: ${{ secrets.HEROKU_APP_NAME }}
         run: |
-          # Set git remote
-          git remote add heroku https://git.heroku.com/${HEROKU_APP_NAME}.git || true
-          # Push to Heroku
+          git remote add heroku https://git.heroku.com/$HEROKU_APP_NAME.git || true
           git push heroku HEAD:main -f
