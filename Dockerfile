@@ -15,8 +15,8 @@ COPY model/ ./model
 COPY tests/ ./tests
 
 # 4. Installer Poetry
-RUN pip install --upgrade pip && \
-    pip install poetry
+RUN poetry config virtualenvs.create false && \
+    poetry install --no-interaction --no-ansi --no-root
 
 # 5. Installer les dépendances du projet
 RUN poetry config virtualenvs.create false && \
