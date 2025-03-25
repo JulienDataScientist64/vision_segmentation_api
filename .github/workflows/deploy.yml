@@ -51,8 +51,8 @@ jobs:
           # 1) Login par "heroku login -i" en fournissant email & clé API comme "mot de passe"
           #    => Évite le "Press any key to open browser..."
           echo "$HEROKU_EMAIL
-$HEROKU_API_KEY
-" | heroku login -i
+          $HEROKU_API_KEY
+          " | heroku login -i
 
           # 2) Configuration du remote heroku (HTTPS)
           git config --global user.email "actions@github.com"
