@@ -1,4 +1,4 @@
-name: 🚀 Déployer FastAPI sur Heroku (sans Docker)
+name: 🚀 Deploy FastAPI to Heroku (sans Docker)
 
 on:
   push:
@@ -10,43 +10,43 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 📥 Récupérer le dépôt
+      - name: 📥 Checkout repository
         uses: actions/checkout@v4
         with:
-          lfs: false   # Désactiver Git LFS
-          submodules: false  # Désactiver la récupération des sous-modules
+          lfs: false
 
-      - name: 🐍 Configurer Python 3.10
+      - name: 🐍 Set up Python 3.10
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
-      - name: 📦 Installer les dépendances
+      - name: 📦 Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt huggingface_hub
+          pip install -r requirements.txt pytest huggingface_hub
 
       - name: 📥 Télécharger le modèle Hugging Face
         run: |
-          mkdir -p ./hf_cache
           python -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='cantalapiedra/semantic-segmentation-model', local_dir='./hf_cache')"
+        env:
+          HUGGINGFACE_HUB_CACHE: ./hf_cache
 
-      - name: ✅ Exécuter les tests
-        run: pytest
+      - name: ✅ Run tests
+        run: |
+          pytest || echo "Tests failed" && exit 1
 
-      - name: 🔧 Installer Heroku CLI
+      - name: 🔧 Install Heroku CLI
         run: |
           curl https://cli-assets.heroku.com/install.sh | sh
 
-      - name: 🔑 Configurer Git
-        run: |
-          git config --global user.email "github-actions@github.com"
-          git config --global user.name "GitHub Actions"
-
-      - name: 🚀 Déployer sur Heroku
+      - name: 🔑 Configure Heroku Remote
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
           HEROKU_APP_NAME: ${{ secrets.HEROKU_APP_NAME }}
         run: |
-          heroku git:remote -a $HEROKU_APP_NAME
-          git push heroku HEAD:main -f
+          git config --global user.email "actions@github.com"
+          git config --global user.name "GitHub Actions"
+          git remote add heroku https://heroku:${HEROKU_API_KEY}@git.heroku.com/${HEROKU_APP_NAME}.git
+
+      - name: 🚀 Deploy to Heroku
+        run: git push heroku HEAD:main -f
