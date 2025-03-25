@@ -12,7 +12,6 @@ app = FastAPI(
     description="Inférence segmentation sémantique utilisant TensorFlow."
 )
 
-# Dictionnaire de regroupement de classes
 CLASS_TO_CATEGORY = {
     7: 0, 8: 0, 9: 0, 10: 0,
     24: 1, 25: 1,
@@ -29,18 +28,20 @@ MAPPING_TABLE = tf.constant(
     dtype=tf.uint8
 )
 
-# 📦 Téléchargement du modèle depuis Hugging Face vers un cache local
-MODEL_DIR = snapshot_download(
-    repo_id="cantalapiedra/semantic-segmentation-model",
-    local_dir="./hf_cache",
-    local_dir_use_symlinks=False,
-    ignore_patterns=["*.msgpack", "*.h5", "*.bin", "*.safetensors"]
-)
+# Variables globales pour le modèle
+model = None
+infer = None
 
-
-# 🔁 Chargement une fois pour toutes au démarrage de l'API
-model = tf.saved_model.load(MODEL_DIR)
-infer = model.signatures["serving_default"]
+def load_model():
+    global model, infer
+    if model is None or infer is None:
+        model_path = snapshot_download(
+            repo_id="cantalapiedra/semantic-segmentation-model",
+            local_dir="./hf_cache",
+            ignore_patterns=["*.msgpack", "*.h5", "*.bin", "*.safetensors"]
+        )
+        model = tf.saved_model.load(model_path)
+        infer = model.signatures["serving_default"]
 
 def preprocess_image(img: Image.Image) -> tf.Tensor:
     img_resized = img.resize((512, 256))
@@ -50,6 +51,7 @@ def preprocess_image(img: Image.Image) -> tf.Tensor:
     return img_tensor
 
 def predict_mask(img_tensor: tf.Tensor) -> np.ndarray:
+    load_model()
     pred = infer(img_tensor)
     pred_key = list(pred.keys())[0]
     pred_mask = tf.argmax(pred[pred_key], axis=-1)[0].numpy()
