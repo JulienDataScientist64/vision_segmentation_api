@@ -1,4 +1,4 @@
-name: 🚀 Deploy FastAPI to Heroku (sans Docker)
+name: Deploy FastAPI to Heroku (sans Docker)
 
 on:
   push:
@@ -10,48 +10,31 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 📥 Checkout repository
+      - name: 📥 Checkout
         uses: actions/checkout@v4
         with:
           lfs: false
           fetch-depth: 0
 
-      - name: 🐍 Set up Python (from runtime.txt)
+      - name: 🐍 Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
-      - name: 📦 Install dependencies using Poetry
+      - name: 📦 Install dependencies (Poetry)
         run: |
           python -m pip install --upgrade pip
           pip install poetry
           poetry config virtualenvs.create false
           poetry install --no-interaction --no-ansi --no-root
 
-      - name: 📥 Télécharger modèle Hugging Face (sans fichiers lourds)
-        env:
-          HUGGINGFACE_HUB_CACHE: ./hf_cache
-        run: |
-          poetry run python -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='cantalapiedra/semantic-segmentation-model', local_dir='./hf_cache', local_dir_use_symlinks=False, ignore_patterns=['*.msgpack', '*.h5', '*.bin', '*.safetensors'])"
-
       - name: ✅ Run tests
-        run: |
-          poetry run python -W ignore::DeprecationWarning -W ignore::PendingDeprecationWarning -m pytest
+        run: poetry run pytest
 
-      - name: 🔧 Install Heroku CLI
-        run: |
-          curl https://cli-assets.heroku.com/install.sh | sh
-
-      - name: 🔑 Configure Heroku Remote
-        env:
-          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
-          HEROKU_APP_NAME: ${{ secrets.HEROKU_APP_NAME }}
-        run: |
-          git config --global user.email "actions@github.com"
-          git config --global user.name "GitHub Actions"
-          git remote remove heroku || true
-          git remote add heroku https://heroku:${HEROKU_API_KEY}@git.heroku.com/${HEROKU_APP_NAME}.git
-
-      - name: 🚀 Deploy to Heroku (force push main branch)
-        run: |
-          git push heroku HEAD:main -f
+      - name: 🚀 Deploy to Heroku (non-Docker)
+        uses: akhileshns/heroku-deploy@v3.12.12
+        with:
+          heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+          heroku_app_name: ${{ secrets.HEROKU_APP_NAME }}
+          heroku_email: ${{ secrets.HEROKU_EMAIL }}
+          usedocker: false
