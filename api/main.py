@@ -1,12 +1,10 @@
-# api/main.py
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.responses import StreamingResponse
+from huggingface_hub import snapshot_download
 import tensorflow as tf
 import numpy as np
 from PIL import Image
 import io
-from huggingface_hub import snapshot_download
-from pathlib import Path
 
 app = FastAPI(
     title="API Segmentation Sémantique",
@@ -14,6 +12,7 @@ app = FastAPI(
     description="Inférence segmentation sémantique utilisant TensorFlow."
 )
 
+# Dictionnaire de regroupement de classes
 CLASS_TO_CATEGORY = {
     7: 0, 8: 0, 9: 0, 10: 0,
     24: 1, 25: 1,
@@ -30,24 +29,28 @@ MAPPING_TABLE = tf.constant(
     dtype=tf.uint8
 )
 
-# Charger le modèle uniquement à la première requête
+# Variables globales pour le modèle
 model = None
 infer = None
 
 def load_model():
+    """Télécharge et charge le modèle depuis Hugging Face si non chargé."""
     global model, infer
     if model is None or infer is None:
         model_path = snapshot_download("cantalapiedra/semantic-segmentation-model")
         model = tf.saved_model.load(model_path)
         infer = model.signatures["serving_default"]
 
-def preprocess_image(img: Image.Image):
+def preprocess_image(img: Image.Image) -> tf.Tensor:
+    """Prépare l’image pour l’inférence (resize + normalisation)."""
     img_resized = img.resize((512, 256))
-    img_tensor = tf.convert_to_tensor(np.array(img_resized), dtype=tf.float32) / 255.0
+    img_array = np.array(img_resized, dtype=np.float32) / 255.0
+    img_tensor = tf.convert_to_tensor(img_array)
     img_tensor = tf.expand_dims(img_tensor, axis=0)
     return img_tensor
 
-def predict_mask(img_tensor):
+def predict_mask(img_tensor: tf.Tensor) -> np.ndarray:
+    """Effectue la prédiction de masque depuis l’image tensorisée."""
     load_model()
     pred = infer(img_tensor)
     pred_key = list(pred.keys())[0]
@@ -61,13 +64,13 @@ def root():
 @app.post("/predict")
 async def predict(image_file: UploadFile = File(...)):
     if image_file.content_type not in ["image/png", "image/jpeg"]:
-        raise HTTPException(400, "Image doit être PNG ou JPEG.")
+        raise HTTPException(status_code=400, detail="Image doit être PNG ou JPEG.")
 
-    contents = await image_file.read()
     try:
+        contents = await image_file.read()
         img = Image.open(io.BytesIO(contents)).convert("RGB")
     except Exception:
-        raise HTTPException(400, "Impossible de lire l'image.")
+        raise HTTPException(status_code=400, detail="Impossible de lire l'image.")
 
     img_tensor = preprocess_image(img)
     pred_mask = predict_mask(img_tensor)
