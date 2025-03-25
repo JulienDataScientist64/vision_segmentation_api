@@ -1,19 +1,16 @@
-# Ignorer les dossiers volumineux
-validation/
-model/saved_model_vgg16_unet/
+
+
+# Ignorer les autres fichiers volumineux dans le reste du projet
 *.h5
 *.keras
 
-# Fichiers Python inutiles
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-
-# Environnement virtuel
-.venv/
-.env/
-
-# OS & IDE
-.DS_Store
-.vscode/
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.bmp
+*.tiff
+__pycache__
+.venv
+# Ignorer le dossier validation
+validation/
