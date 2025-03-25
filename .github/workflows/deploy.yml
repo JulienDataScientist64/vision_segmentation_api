@@ -33,7 +33,7 @@ jobs:
 
       - name: ✅ Run tests
         run: |
-          pytest || echo "Tests failed" && exit 1
+          python -W ignore::DeprecationWarning -W ignore::PendingDeprecationWarning -m pytest
 
       - name: 🔧 Install Heroku CLI
         run: |
