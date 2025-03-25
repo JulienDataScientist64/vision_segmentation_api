@@ -14,6 +14,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           lfs: false   # IMPORTANT : désactiver Git LFS
+          submodules: recursive  # Ensure submodules are checked out
 
       - name: 🐍 Set up Python 3.10
         uses: actions/setup-python@v5
@@ -27,6 +28,7 @@ jobs:
 
       - name: 📥 Télécharger le modèle Hugging Face
         run: |
+          mkdir -p ./hf_cache
           python -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='cantalapiedra/semantic-segmentation-model', local_dir='./hf_cache')"
 
       - name: ✅ Run tests
@@ -36,12 +38,17 @@ jobs:
         run: |
           curl https://cli-assets.heroku.com/install.sh | sh
 
-      - name: 🔑 Configure Heroku Remote (avec API Key)
+      - name: 🔑 Configure Git
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+        run: |
+          git config --global user.email "github-actions@github.com"
+          git config --global user.name "GitHub Actions"
+
+      - name: 🚀 Deploy to Heroku (non-Docker)
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
           HEROKU_APP_NAME: ${{ secrets.HEROKU_APP_NAME }}
         run: |
-          git remote add heroku https://heroku:${HEROKU_API_KEY}@git.heroku.com/${HEROKU_APP_NAME}.git
-
-      - name: 🚀 Deploy to Heroku (non-Docker)
-        run: git push heroku HEAD:main -f
+          heroku git:remote -a $HEROKU_APP_NAME
+          git push heroku HEAD:main -f
