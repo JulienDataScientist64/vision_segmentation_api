@@ -14,3 +14,4 @@ __pycache__
 .venv
 # Ignorer le dossier validation
 validation/
+hf_cache/
