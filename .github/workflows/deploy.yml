@@ -31,7 +31,11 @@ jobs:
       - name: ✅ Run tests
         run: poetry run pytest
 
-      - name: 🚀 Deploy to Heroku (non-Docker)
+      - name: 🔧 Install Heroku CLI
+        run: |
+          curl https://cli-assets.heroku.com/install.sh | sh
+
+      - name: 🚀 Deploy to Heroku
         uses: akhileshns/heroku-deploy@v3.12.12
         with:
           heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
