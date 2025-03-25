@@ -38,6 +38,7 @@ def load_model():
         model_path = snapshot_download(
             repo_id="cantalapiedra/semantic-segmentation-model",
             local_dir="./hf_cache",
+            local_dir_use_symlinks=False,
             ignore_patterns=["*.msgpack", "*.h5", "*.bin", "*.safetensors"]
         )
         model = tf.saved_model.load(model_path)
