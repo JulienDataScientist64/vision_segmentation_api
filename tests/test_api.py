@@ -15,14 +15,15 @@ def test_root():
     reason="Image de test absente."
 )
 def test_predict_endpoint():
-    # Vérifie d'abord si le modèle est bien présent (pour du debug rapide)
-    model_file = Path("./hf_cache/saved_model.pb")
-    assert model_file.exists(), f"Le modèle n'existe pas à l'emplacement : {model_file.resolve()}"
-
     image_path = Path("tests/frankfurt_000000_001236_leftImg8bit.png")
+
     with open(image_path, "rb") as img:
         files = {"image_file": ("test_image.png", img, "image/png")}
         response = client.post("/predict", files=files)
 
     assert response.status_code == 200
     assert response.headers["content-type"] == "image/png"
+
+    # Vérifier si le résultat est bien une image PNG valide
+    content = response.content
+    assert content[:8] == b'\x89PNG\r\n\x1a\n', "La réponse n'est pas une image PNG valide"
