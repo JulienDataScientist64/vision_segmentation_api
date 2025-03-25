@@ -42,19 +42,28 @@ jobs:
         run: |
           curl https://cli-assets.heroku.com/install.sh | sh
 
-      - name: 🔑 Configure Heroku Git Remote
+      - name: 🔑 Authenticate with Heroku
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
-          HEROKU_APP_NAME: ${{ secrets.HEROKU_APP_NAME }}
         run: |
-          # Configuration du remote Git pour Heroku
-          git config --global user.email "actions@github.com"
-          git config --global user.name "GitHub Actions"
-          git remote remove heroku || true
-          git remote add heroku https://heroku:${HEROKU_API_KEY}@git.heroku.com/${HEROKU_APP_NAME}.git
+          # Create netrc file for authentication
+          cat > ~/.netrc <<EOF
+          machine api.heroku.com
+            login ${{ secrets.HEROKU_EMAIL }}
+            password ${HEROKU_API_KEY}
+          machine git.heroku.com
+            login ${{ secrets.HEROKU_EMAIL }}
+            password ${HEROKU_API_KEY}
+          EOF
 
-          # Vérification de la configuration (optionnel)
-          git remote -v
+          # Verify Heroku authentication
+          heroku auth:whoami
 
       - name: 🚀 Deploy to Heroku
-        run: git push heroku HEAD:main -f
+        env:
+          HEROKU_APP_NAME: ${{ secrets.HEROKU_APP_NAME }}
+        run: |
+          # Set git remote
+          git remote add heroku https://git.heroku.com/${HEROKU_APP_NAME}.git || true
+          # Push to Heroku
+          git push heroku HEAD:main -f
