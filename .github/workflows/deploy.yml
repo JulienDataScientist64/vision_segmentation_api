@@ -51,7 +51,7 @@ jobs:
           -H "Accept: application/vnd.heroku+json; version=3" \
           -H "Authorization: Bearer $HEROKU_API_KEY"
 
-      - name: 🔑 Configure .netrc + Deploy
+            - name: 🔑 Configure .netrc + Push to Heroku
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
           HEROKU_APP_NAME: ${{ secrets.HEROKU_APP_NAME }}
@@ -64,10 +64,10 @@ jobs:
           machine git.heroku.com
           login $HEROKU_EMAIL
           password $HEROKU_API_KEY
-          " > ~/.netrc
+          " >> ~/.netrc
 
           git config --global credential.helper store
+          git config --global user.name "JulienDataScientist64"
+          git config --global user.email "jcantalapiedra1@gmail.com"
           heroku git:remote --app $HEROKU_APP_NAME
-
-          git commit --allow-empty -m "♻️ Force rebuild Heroku" || true
           git push heroku HEAD:main -f
