@@ -3,8 +3,7 @@ name: Deploy FastAPI to Heroku
 on:
   push:
     branches:
-      #- main
-      - deploy  # optionnel : pour que les deux branches déclenchent le déploiement
+      - deploy
 
 jobs:
   deploy:
@@ -30,10 +29,22 @@ jobs:
 
       - name: Download model from Hugging Face
         env:
-          HUGGINGFACE_HUB_CACHE: /tmp/hf_cache
-
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          poetry run python -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='cantalapiedra/semantic-segmentation-model', local_dir='/tmp/hf_cache')"
+          poetry run python -c "
+          import os
+          from huggingface_hub import snapshot_download
+          token = os.environ.get('HF_TOKEN')
+          repo_path = snapshot_download(
+              repo_id='cantalapiedra/semantic-segmentation-model',
+              revision='master',
+              local_dir='/tmp/hf_cache',
+              use_auth_token=token
+          )
+          print('Modèle téléchargé à :', repo_path)
+          "
+          echo "Contenu /tmp/hf_cache:"
+          ls -lah /tmp/hf_cache
 
       - name: Run tests
         run: |
