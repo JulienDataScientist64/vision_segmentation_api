@@ -40,12 +40,15 @@ def load_model():
     global model, infer
     if model is None or infer is None:
         logging.info("Chargement du modèle depuis Hugging Face...")
+
         model_path = snapshot_download(
             repo_id="cantalapiedra/semantic-segmentation-model",
             local_dir="/tmp/hf_cache",
-            local_dir_use_symlinks=False,
-            ignore_patterns=["*.msgpack", "*.h5", "*.bin", "*.safetensors"]
+            local_dir_use_symlinks=False
+            # Surtout pas de ignore_patterns
         )
+
+        # Ton saved_model.pb est juste à la racine
         model = tf.saved_model.load(model_path)
         infer = model.signatures["serving_default"]
         logging.info("Modèle chargé avec succès.")
