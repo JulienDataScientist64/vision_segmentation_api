@@ -17,3 +17,4 @@ validation/
 model/
 hf_model/
 
+.venv/

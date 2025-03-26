@@ -28,6 +28,7 @@ jobs:
           poetry config virtualenvs.create false
           poetry install --no-interaction --no-ansi --no-root
 
+
       - name: 📥 Télécharger le modèle Hugging Face (optionnel)
         env:
           HUGGINGFACE_HUB_CACHE: ./hf_cache

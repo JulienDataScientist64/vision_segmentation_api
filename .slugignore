@@ -8,3 +8,10 @@ __pycache__/
 *.msgpack
 *.bin
 *.safetensors
+# Dossiers inutiles
+.notebooks/
+.notebook/
+*.ipynb
+images/
+docs/
+.venv/
