@@ -1,57 +1,57 @@
-name: 🚀 Deploy FastAPI to Heroku
+name: Deploy FastAPI to Heroku
 
 on:
   push:
     branches:
-      - main
+      #- main
+      - deploy  # optionnel : pour que les deux branches déclenchent le déploiement
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 📥 Checkout repository
+      - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          lfs: false
           fetch-depth: 0
 
-      - name: 🐍 Set up Python
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.10"
 
-      - name: 📦 Install Poetry + Dependencies
+      - name: Install Poetry and dependencies
         run: |
           python -m pip install --upgrade pip
           pip install poetry
           poetry config virtualenvs.create false
           poetry install --no-interaction --no-ansi --no-root
 
-      - name: 📥 Télécharger le modèle Hugging Face
+      - name: Download model from Hugging Face
         env:
           HUGGINGFACE_HUB_CACHE: ./hf_cache
         run: |
           poetry run python -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='cantalapiedra/semantic-segmentation-model', local_dir='./hf_cache')"
 
-      - name: ✅ Run tests
+      - name: Run tests
         run: |
-          poetry run pytest || echo "No tests or test errors, continuing..."
+          poetry run pytest || echo "Tests failed or none present. Continuing..."
 
-      - name: 🔧 Install Heroku CLI
+      - name: Install Heroku CLI
         run: |
           curl https://cli-assets.heroku.com/install.sh | sh
 
-      - name: 🧹 Clear Heroku build cache
+      - name: Clear Heroku build cache
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
           HEROKU_APP_NAME: ${{ secrets.HEROKU_APP_NAME }}
         run: |
           curl -n -X DELETE https://api.heroku.com/apps/$HEROKU_APP_NAME/build-cache \
-          -H "Accept: application/vnd.heroku+json; version=3" \
-          -H "Authorization: Bearer $HEROKU_API_KEY"
+            -H "Accept: application/vnd.heroku+json; version=3" \
+            -H "Authorization: Bearer $HEROKU_API_KEY"
 
-      - name: 🔑 Configure .netrc + Push to Heroku
+      - name: Deploy to Heroku
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
           HEROKU_APP_NAME: ${{ secrets.HEROKU_APP_NAME }}
@@ -66,8 +66,8 @@ jobs:
           password $HEROKU_API_KEY
           " >> ~/.netrc
 
-          git config --global credential.helper store
           git config --global user.name "JulienDataScientist64"
           git config --global user.email "jcantalapiedra1@gmail.com"
+
           heroku git:remote --app $HEROKU_APP_NAME
           git push heroku HEAD:main -f
