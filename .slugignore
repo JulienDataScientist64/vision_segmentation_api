@@ -18,3 +18,11 @@ tests/
 notebooks/
 validation/
 *.ipynb
+
+# Fichiers image lourds
+*.png
+*.jpg
+*.jpeg
+*.bmp
+*.tiff
+images/
