@@ -12,12 +12,16 @@ logging.basicConfig(level=logging.INFO)
 
 app = FastAPI(title="API Segmentation Sémantique")
 
-CLASS_TO_CATEGORY = { ... }  # inchangé
-MAPPING_TABLE = tf.constant(
-    [CLASS_TO_CATEGORY.get(i, 7) for i in range(256)],
-    dtype=tf.uint8
-)
-
+CLASS_TO_CATEGORY = {
+    7: 0, 8: 0, 9: 0, 10: 0,
+    24: 1, 25: 1,
+    26: 2, 27: 2, 28: 2, 29: 2, 30: 2, 31: 2, 32: 2, 33: 2,
+    11: 3, 12: 3, 13: 3, 14: 3, 15: 3, 16: 3,
+    17: 4, 18: 4, 19: 4, 20: 4,
+    21: 5, 22: 5,
+    23: 6,
+    0: 7, 1: 7, 2: 7, 3: 7, 4: 7, 5: 7, 255: 7
+}
 model = None
 infer = None
 
