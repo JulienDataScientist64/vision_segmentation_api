@@ -45,7 +45,7 @@ def load_model():
             repo_id="cantalapiedra/semantic-segmentation-model",
             local_dir="/tmp/hf_cache",
             local_dir_use_symlinks=False
-            use_auth_token=True
+            use_auth_token=HF_TOKEN
         )
 
         # Ton saved_model.pb est juste à la racine
