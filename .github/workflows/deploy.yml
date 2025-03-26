@@ -48,13 +48,13 @@ jobs:
         run: |
           # 1) Construire le ~/.netrc pour authentifier Git avec Heroku
           echo "machine api.heroku.com
-  login $HEROKU_EMAIL
-  password $HEROKU_API_KEY
+          login $HEROKU_EMAIL
+          password $HEROKU_API_KEY
 
-machine git.heroku.com
-  login $HEROKU_EMAIL
-  password $HEROKU_API_KEY
-" >> ~/.netrc
+          machine git.heroku.com
+          login $HEROKU_EMAIL
+          password $HEROKU_API_KEY
+          " >> ~/.netrc
 
           # 2) Empêcher que Git demande des informations interactives
           git config --global credential.helper store
