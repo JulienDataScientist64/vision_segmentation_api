@@ -18,6 +18,7 @@ tests/
 notebooks/
 validation/
 *.ipynb
+*.tar
 
 # Fichiers image lourds
 *.png
