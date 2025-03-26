@@ -1,0 +1,10 @@
+hf_cache/
+tests/
+validation/
+__pycache__/
+*.h5
+*.zip
+*.pt
+*.msgpack
+*.bin
+*.safetensors
