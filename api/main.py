@@ -37,7 +37,7 @@ def load_model():
     if model is None or infer is None:
         model_path = snapshot_download(
             repo_id="cantalapiedra/semantic-segmentation-model",
-            local_dir="./hf_cache",
+            local_dir="/tmp/hf_cache",
             local_dir_use_symlinks=False,
             ignore_patterns=["*.msgpack", "*.h5", "*.bin", "*.safetensors"]
         )
