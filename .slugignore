@@ -1,32 +1,20 @@
-# Répertoires lourds à exclure
-.venv/
-tests/
-validation/
-notebooks/
-docs/
-images/
+# Ne pas inclure le cache du modèle téléchargé
 hf_cache/
-model/
-
-# Fichiers lourds inutiles pour le déploiement
+__pycache__/
+*.tar
+*.tgz
+*.gz
 *.zip
-*.pt
+*.npz
+*.npy
 *.msgpack
+*.h5
+*.pb
+*.keras
+*.pt
 *.bin
 *.safetensors
-*.keras
-*.pb
-*.h5
+tests/
+notebooks/
+validation/
 *.ipynb
-
-# Images
-*.png
-*.jpg
-*.jpeg
-*.gif
-*.bmp
-*.tiff
-
-# Cache et temporaires
-- __pycache__/
-+ __pycache__/
