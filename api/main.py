@@ -26,14 +26,14 @@ def load_model():
     if model is None or infer is None:
         logging.info("Chargement du modèle depuis Hugging Face...")
 
-        HF_TOKEN = os.environ.get("HF_TOKEN")  # Récupère le token HF
+        hf_token = os.environ.get("HF_TOKEN")
         model_path = snapshot_download(
-            repo_id="cantalapiedra/semantic-segmentation-model",
-            local_dir="/tmp/hf_cache",
-            local_dir_use_symlinks=False,
-            use_auth_token=HF_TOKEN,
-            revision="master"  # si ton dépôt n’a pas de branche main
-        )
+        repo_id="cantalapiedra/semantic-segmentation-model",
+        revision="master",
+        use_auth_token=hf_token,
+        local_dir="/tmp/hf_cache",
+        local_dir_use_symlinks=False
+)
 
         # Ton saved_model.pb est à la racine
         model = tf.saved_model.load(model_path)
