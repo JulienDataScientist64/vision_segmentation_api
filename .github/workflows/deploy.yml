@@ -16,25 +16,27 @@ jobs:
           lfs: false
           fetch-depth: 0
 
-      - name: 🐍 Set up Python 3.10
+      - name: 🐍 Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: "3.10"
 
-      - name: 📦 Install dependencies
+      - name: 📦 Install dependencies (Poetry)
         run: |
           python -m pip install --upgrade pip
-          pip install huggingface_hub pytest
+          pip install poetry
+          poetry config virtualenvs.create false
+          poetry install --no-interaction --no-ansi --no-root
 
-      - name: 📥 Télécharger le modèle Hugging Face
-        run: |
-          python -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='cantalapiedra/semantic-segmentation-model', local_dir='./hf_cache')"
+      - name: 📥 Télécharger le modèle Hugging Face (optionnel)
         env:
           HUGGINGFACE_HUB_CACHE: ./hf_cache
+        run: |
+          poetry run python -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='cantalapiedra/semantic-segmentation-model', local_dir='./hf_cache')"
 
       - name: ✅ Run tests
         run: |
-          python -m pytest
+          poetry run pytest
 
       - name: 🔧 Install Heroku CLI
         run: |
@@ -46,7 +48,7 @@ jobs:
           HEROKU_APP_NAME: ${{ secrets.HEROKU_APP_NAME }}
           HEROKU_EMAIL: ${{ secrets.HEROKU_EMAIL }}
         run: |
-          # 1) Construire le ~/.netrc pour authentifier Git avec Heroku
+          # 1) Générer un ~/.netrc incluant l'API Key comme "mot de passe"
           echo "machine api.heroku.com
           login $HEROKU_EMAIL
           password $HEROKU_API_KEY
@@ -56,11 +58,11 @@ jobs:
           password $HEROKU_API_KEY
           " >> ~/.netrc
 
-          # 2) Empêcher que Git demande des informations interactives
+          # 2) Empêche Git de demander un login interactif
           git config --global credential.helper store
 
-          # 3) Configurer le remote heroku
+          # 3) Configure le remote heroku (HTTPS)
           heroku git:remote --app $HEROKU_APP_NAME
 
-          # 4) Pousser en forçant (HEAD -> main)
+          # 4) Pousse le code (HEAD -> main) en forçant si besoin
           git push heroku HEAD:main -f
