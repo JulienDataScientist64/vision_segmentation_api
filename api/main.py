@@ -46,48 +46,26 @@ model = None
 infer = None
 
 # --- Fonctions load_model, preprocess_image, predict_mask, colorize_mask_8 ---
-# --- INCHANGÉES ---
+# --- FONCTION load_model (TA VERSION ORIGINALE STRICTE) ---
 def load_model():
     global model, infer
-    # Vérifier si déjà chargé pour éviter de re-télécharger/re-charger inutilement
-    if model is not None and infer is not None:
-        logging.info("Modèle déjà chargé.")
-        return # Sortir si déjà chargé
+    if model is None or infer is None:
+        logging.info("Chargement du modèle depuis Hugging Face...")
 
-    logging.info("Tentative de chargement du modèle depuis Hugging Face...")
-    hf_token = os.environ.get("HF_TOKEN")
-    # Utiliser un chemin spécifique dans /tmp qui est généralement accessible sur Heroku
-    model_download_path = "/tmp/hf_model_cache"
-    os.makedirs(model_download_path, exist_ok=True) # S'assurer que le dossier existe
-
-    try:
-        # Revenir à l'utilisation de local_dir comme dans l'original
-        # snapshot_download retourne le chemin vers le dossier contenant les fichiers du snapshot
-        actual_model_path = snapshot_download(
+        hf_token = os.environ.get("HF_TOKEN")
+        # Utiliser exactement les paramètres que tu avais
+        model_path = snapshot_download(
             repo_id="cantalapiedra/semantic-segmentation-model",
-            revision="main", # ou "master" si c'est le nom correct de la branche/tag
+            revision="master", # Garder "master" si c'est le nom correct de ta branche/tag
             use_auth_token=hf_token,
-            local_dir=model_download_path, # Télécharger DANS ce dossier local
+            local_dir="/tmp/hf_cache", # Garder ton chemin de cache original
             local_dir_use_symlinks=False
         )
-        logging.info(f"Snapshot du modèle téléchargé/trouvé dans : {actual_model_path}")
-
-        # Charger le modèle depuis le chemin retourné par snapshot_download
-        # tf.saved_model.load attend le chemin du dossier contenant saved_model.pb
-        model = tf.saved_model.load(actual_model_path)
+        # Charger directement depuis model_path
+        model = tf.saved_model.load(model_path)
         infer = model.signatures["serving_default"]
-        logging.info(f"Modèle TensorFlow chargé avec succès depuis {actual_model_path}.")
-
-    except Exception as e:
-        logging.error(f"ERREUR CRITIQUE lors du téléchargement ou chargement du modèle: {e}", exc_info=True)
-        # Il est important de remonter l'erreur pour que l'API échoue proprement
-        # si le modèle ne peut pas être chargé au démarrage ou lors de la première requête.
-        # Note: Si load_model est appelé depuis startup, cela peut empêcher le démarrage.
-        # Si appelé depuis predict, cela lèvera une HTTPException plus tard.
-        # Rendre model et infer explicitement None en cas d'échec
-        model = None
-        infer = None
-        raise RuntimeError(f"Impossible de charger le modèle TensorFlow: {e}") # Remonter l'erreur
+        logging.info("Modèle chargé avec succès.")
+# --- FIN load_model ---
 
 
 def preprocess_image(img: Image.Image) -> tf.Tensor:
